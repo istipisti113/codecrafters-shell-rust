@@ -20,6 +20,13 @@ fn main()  {
 			}
 		)
 	);
+	// builtins.insert(
+	// 	"type".to_string(),
+	// 	Box::new(
+	// 		move |input: String|{
+	// 		}
+	// 	)
+	// );
     loop{
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -30,6 +37,11 @@ fn main()  {
 		if builtins.contains_key(input.split(" ").nth(0).unwrap()){
 			if builtins[&input](input) == 1 {
 				return;
+			}
+		}else if input.split(" ").nth(0).unwrap() == "type" {
+			let a = input.split(" ").nth(1).unwrap();
+			if builtins.contains_key(a) {
+				println!("{} is a shell builtin", a);
 			}
 		}else{
 			println!("{}: command not found", input.trim());
