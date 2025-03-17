@@ -40,8 +40,10 @@ fn main()  {
 			}
 		}else if input.split(" ").nth(0).unwrap() == "type" {
 			let a = input.split(" ").nth(1).unwrap();
-			if builtins.contains_key(a) {
+			if builtins.contains_key(a) || a == "type" {
 				println!("{} is a shell builtin", a);
+			} else {
+				println!("{}: not found", a);
 			}
 		}else{
 			println!("{}: command not found", input.trim());
