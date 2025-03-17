@@ -20,6 +20,7 @@ fn main()  {
 			}
 		)
 	);
+
 	// builtins.insert(
 	// 	"type".to_string(),
 	// 	Box::new(
@@ -34,11 +35,12 @@ fn main()  {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
 		input = input.trim().to_string();
-		if builtins.contains_key(input.split(" ").nth(0).unwrap()){
-			if builtins[&input](input) == 1 {
+		let command = input.split(" ").nth(0).unwrap();
+		if builtins.contains_key(command){
+			if builtins[command](input) == 1 {
 				return;
 			}
-		}else if input.split(" ").nth(0).unwrap() == "type" {
+		}else if command == "type" {
 			let a = input.split(" ").nth(1).unwrap();
 			if builtins.contains_key(a) || a == "type" {
 				println!("{} is a shell builtin", a);
