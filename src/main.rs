@@ -9,20 +9,20 @@ use std::process::Command;
 fn main()  {
     //let mut builtins: HashMap<String, Box<dyn Fn(String)-> i32>> = HashMap::from([
     let mut commands: Vec<String> = Vec::new();
-    let builtins: HashMap<String, Box<dyn Fn(String, &Vec<String>)-> i32>> = HashMap::from([
+    let builtins: HashMap<String, Box<dyn Fn(String, &Vec<String>, &Vec<&str>)-> i32>> = HashMap::from([
         (
             "echo".to_string(),
             Box::new(
-                move |mut input: String, _commands: &Vec<String>|{
+                move |mut input: String, _commands: &Vec<String>, _args: &Vec<&str>|{
                     println!("{}", input.split_off(5));
                     return 0;
                 }
-            ) as Box<dyn Fn(String, &Vec<String>)->i32>
+            ) as Box<dyn Fn(String, &Vec<String>, &Vec<&str>)->i32>
         ),
         (
             "exit".to_string(),
             Box::new(
-                move |_input: String, _commands: &Vec<String>|{
+                move |_input: String, _commands: &Vec<String>, _args: &Vec<&str>|{
                     return 1;
                 }
             )
@@ -31,7 +31,7 @@ fn main()  {
         (
             "type".to_string(),
             Box::new(
-                move |input: String, commands: &Vec<String>|{
+                move |input: String, commands: &Vec<String>, _args: &Vec<&str>|{
                     let prog: String = input.split(" ").nth(1).unwrap().to_string();
                     if commands.contains(&prog){
                         println!("{} is a shell builtin", &prog);
@@ -58,9 +58,19 @@ fn main()  {
                     }
                 }
             )
+        ),
+        (
+            "pwd".to_string(),
+            Box::new(
+                move |_input: String, _commands: &Vec<String>, args: &Vec<&str>| {
+                    println!("{}", args[0]);
+                    0
+                }
+            )
         )
     ]);
     commands = builtins.keys().map(|x| x.to_string()).collect();
+    let pwd: String = String::from_utf8_lossy(&Command::new("pwd").output().unwrap().stdout).to_string().trim().to_string();
     loop{
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -71,7 +81,7 @@ fn main()  {
         let command = input.split(" ").nth(0).unwrap();
         let path = env::var("PATH").unwrap();
         if builtins.contains_key(command){
-            if builtins[command](input, &commands) == 1 {
+            if builtins[command](input, &commands, &vec![&pwd]) == 1 {
                 return;
             }
 
