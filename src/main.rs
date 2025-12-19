@@ -13,8 +13,8 @@ fn main()  {
     (
       "echo".to_string(),
       Box::new(
-        move |mut input: String, _commands: &Vec<String>, _path: &mut String, params: &Vec<String>|{
-          println!("{}", params.join(" "));
+        move |mut _input: String, _commands: &Vec<String>, _path: &mut String, params: &Vec<String>|{
+          println!("{}", params.join(""));
           return 0;
         }
       ) as Box<dyn Fn(String, &Vec<String>, &mut String, &Vec<String>)->i32>
