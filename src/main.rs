@@ -93,8 +93,13 @@ fn main()  {
                             return 0;
                         }
                     } else if dir.chars().into_iter().nth(0).unwrap() == '/'{ // absolute path
-                        *path = dir.to_owned();
-                        return 0;
+                        if Path::new(dir).exists(){
+                            *path = dir.to_owned();
+                            return 0;
+                        } else {
+                            println!("cd: {}: No such file or directory", dir);
+                            return -1;
+                        }
                     }
                     *path = path.to_owned()+"/"+dir;
                     0
