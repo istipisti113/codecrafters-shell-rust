@@ -9,20 +9,20 @@ use std::process::Command;
 fn main()  {
     //let mut builtins: HashMap<String, Box<dyn Fn(String)-> i32>> = HashMap::from([
     let mut commands: Vec<String> = Vec::new();
-    let builtins: HashMap<String, Box<dyn Fn(String, &Vec<String>, &Vec<&str>)-> i32>> = HashMap::from([
+    let builtins: HashMap<String, Box<dyn Fn(String, &Vec<String>, &mut String)-> i32>> = HashMap::from([
         (
             "echo".to_string(),
             Box::new(
-                move |mut input: String, _commands: &Vec<String>, _args: &Vec<&str>|{
+                move |mut input: String, _commands: &Vec<String>, _path: &mut String|{
                     println!("{}", input.split_off(5));
                     return 0;
                 }
-            ) as Box<dyn Fn(String, &Vec<String>, &Vec<&str>)->i32>
+            ) as Box<dyn Fn(String, &Vec<String>, &mut String)->i32>
         ),
         (
             "exit".to_string(),
             Box::new(
-                move |_input: String, _commands: &Vec<String>, _args: &Vec<&str>|{
+                move |_input: String, _commands: &Vec<String>, _path: &mut String|{
                     return 1;
                 }
             )
@@ -31,7 +31,7 @@ fn main()  {
         (
             "type".to_string(),
             Box::new(
-                move |input: String, commands: &Vec<String>, _args: &Vec<&str>|{
+                move |input: String, commands: &Vec<String>, _path: &mut String|{
                     let prog: String = input.split(" ").nth(1).unwrap().to_string();
                     if commands.contains(&prog){
                         println!("{} is a shell builtin", &prog);
@@ -63,8 +63,8 @@ fn main()  {
         (
             "pwd".to_string(),
             Box::new(
-                move |_input: String, _commands: &Vec<String>, args: &Vec<&str>| {
-                    println!("{}", args[0]);
+                move |_input: String, _commands: &Vec<String>, path: &mut String| {
+                    println!("{}", path);
                     0
                 }
             )
@@ -73,17 +73,37 @@ fn main()  {
         (
             "ls".to_string(),
             Box::new(
-                move |_input:String,  _commands: &Vec<String>, args: &Vec<&str>| {
-                    let entries = Path::new(args[0]).read_dir().unwrap().map(|x| x.unwrap().file_name().into_string().unwrap()).collect::<Vec<String>>();
-                    println!("{}", entries.join(" "));
+                move |_input:String,  _commands: &Vec<String>, path: &mut String| {
+                    let entries = Path::new(path).read_dir().unwrap().map(|x| x.unwrap().file_name().into_string().unwrap()).collect::<Vec<String>>();
+                    println!("{}", entries.join("\t"));
                     0
                 } 
+            )
+        ),
+        (
+            String::from("cd"),
+            Box::new(
+                move |input: String, _commands: &Vec<String>, path: &mut String|{
+                    let dir = input.split(" ").nth(1).unwrap();
+                    if dir == ".."{
+                        let ownedpath = path.to_owned();
+                        let mut vectorised = ownedpath.split("/").collect::<Vec<&str>>();
+                        if let Some(_last) = vectorised.pop(){
+                            *path = vectorised.join("/");
+                            return 0;
+                        }
+                    } else if dir.chars().into_iter().nth(0).unwrap() == '/'{ // absolute path
+                        *path = dir.to_owned();
+                    }
+                    *path = path.to_owned()+"/"+dir;
+                    0
+                }
             )
         )
     ]);
 
     commands = builtins.keys().map(|x| x.to_string()).collect();
-    let pwd: String = String::from_utf8_lossy(&Command::new("pwd").output().unwrap().stdout).to_string().trim().to_string();
+    let mut pwd: String = String::from_utf8_lossy(&Command::new("pwd").output().unwrap().stdout).to_string().trim().to_string();
     loop{
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -94,7 +114,7 @@ fn main()  {
         let command = input.split(" ").nth(0).unwrap();
         let path = env::var("PATH").unwrap();
         if builtins.contains_key(command){
-            if builtins[command](input, &commands, &vec![&pwd]) == 1 {
+            if builtins[command](input, &commands, &mut pwd) == 1 {
                 return;
             }
 
