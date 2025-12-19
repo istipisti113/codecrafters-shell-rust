@@ -101,8 +101,8 @@ fn main()  {
             let mut vectorised = ownedpath.split("/").collect::<Vec<&str>>();
             //let cdpath = input.split(" ").nth(1).unwrap().split("/").into_iter();
 
-            for directory in params.iter().filter(|x|x!=&"."){
-              if directory == ".." {
+            for directory in params[0].split("/").filter(|x|x!=&"."){
+              if directory == ".." {// go one back
                 if let Some(_last) = vectorised.pop(){
                   *path = vectorised.join("/");
                 } else {
