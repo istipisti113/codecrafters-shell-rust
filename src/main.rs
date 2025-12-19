@@ -143,9 +143,12 @@ fn main()  {
     let mut params: Vec<String> = vec![];
 
     let mut counter = 0;
-    params = input.split("\'").filter(|x|!x.is_empty()).map(|x|
+    params = input.split("\'").map(|x|
       {
         counter+=1;
+        if x==""{
+          println!("asfasfsdf");
+        }
         if counter%2==1{
           return x.trim().split(" ").collect();
         }
