@@ -146,10 +146,10 @@ fn main()  {
     params = input.split("\'").map(|x|
       {
         counter+=1;
-        if x==""{
-          println!("asfasfsdf");
-        }
         if counter%2==1{
+          if x==""{
+            return vec![""];
+          }
           return x.trim().split(" ").collect();
         }
         return vec![x.trim()];
