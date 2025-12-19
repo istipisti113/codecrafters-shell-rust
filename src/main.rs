@@ -109,7 +109,7 @@ fn main()  {
                             } else if directory == "."{
                                 //do nothing, this is the current one
                             } else {
-                                println!("{}", directory);
+                                //println!("{}", directory);
                                 *path = path.to_owned()+"/"+directory;
                             }
                         }
