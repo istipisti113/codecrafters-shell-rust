@@ -85,7 +85,7 @@ fn main()  {
                     if output.status.success(){
                         let stdout = String::from_utf8_lossy(&output.stdout);
                         if stdout.len()>0{
-                            println!("{}", stdout);
+                            println!("{}", stdout.trim());
                         }
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
