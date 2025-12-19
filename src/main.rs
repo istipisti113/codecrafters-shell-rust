@@ -59,6 +59,7 @@ fn main()  {
                 }
             )
         ),
+
         (
             "pwd".to_string(),
             Box::new(
@@ -67,8 +68,20 @@ fn main()  {
                     0
                 }
             )
+        ),
+
+        (
+            "ls".to_string(),
+            Box::new(
+                move |_input:String,  _commands: &Vec<String>, args: &Vec<&str>| {
+                    let entries = Path::new(args[0]).read_dir().unwrap().map(|x| x.unwrap().file_name().into_string().unwrap()).collect::<Vec<String>>();
+                    println!("{}", entries.join(" "));
+                    0
+                } 
+            )
         )
     ]);
+
     commands = builtins.keys().map(|x| x.to_string()).collect();
     let pwd: String = String::from_utf8_lossy(&Command::new("pwd").output().unwrap().stdout).to_string().trim().to_string();
     loop{
