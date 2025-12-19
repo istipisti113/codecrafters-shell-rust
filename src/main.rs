@@ -143,7 +143,7 @@ fn main()  {
     let mut params: Vec<String> = vec![];
 
     let mut counter = 0;
-    params = input.split("\'").map(|x|
+    params = input.split("\'").filter(|x|!x.is_empty()).map(|x|
       {
         counter+=1;
         if counter%2==1{
