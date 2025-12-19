@@ -1,7 +1,9 @@
+use std::fmt::format;
 use std::io::{self, Write};
 use std::collections::HashMap;
-use std::env;
+use std::{env, fs};
 use std::path::Path;
+use std::os::unix::fs::PermissionsExt;
 
 fn main()  {
     //let mut builtins: HashMap<String, Box<dyn Fn(String)-> i32>> = HashMap::from([
@@ -42,6 +44,9 @@ fn main()  {
                                             let bins = val.map(|x| x.unwrap().file_name()).map(|x| x.into_string().unwrap()).collect::<Vec<String>>();
                                             //println!("{}", bins.join(", "));
                                             if bins.contains(&prog){
+                                                let metadata = fs::metadata(format!("{}/{}", &dir, prog)).unwrap();
+                                                let permissions = metadata.permissions();
+                                                if permissions.mode() & 0o111 != 0{continue;}
                                                 println!("{} is {}/{}", &prog, dir, &prog);
                                                 return 0;
                                             }
