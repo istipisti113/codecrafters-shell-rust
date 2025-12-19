@@ -74,12 +74,14 @@ fn main()  {
             "ls".to_string(),
             Box::new(
                 move |_input:String,  _commands: &Vec<String>, path: &mut String| {
-                    let entries = Path::new(path).read_dir().expect(&format!("bad path: {}", &path)).map(|x| x.unwrap().file_name().into_string().unwrap()).collect::<Vec<String>>();
+                    let entries = Path::new(path).read_dir().expect(&format!("bad path: {}", &path))
+                        .map(|x| x.unwrap().file_name().into_string().unwrap()).collect::<Vec<String>>();
                     println!("{}", entries.join("\t"));
                     0
                 } 
             )
         ),
+
         (
             String::from("cd"),
             Box::new(
@@ -93,27 +95,27 @@ fn main()  {
                             println!("cd: {}: No such file or directory", dir);
                             return -1;
                         }
-                    } else {
+                    } else { // relative path
                         let ownedpath = path.to_owned();
                         let mut vectorised = ownedpath.split("/").collect::<Vec<&str>>();
-                        let cdpath = input.split(" ").nth(1).unwrap().split("/");
+                        let cdpath = input.split(" ").nth(1).unwrap().split("/").into_iter();
+
                         for directory in cdpath{
                             if directory == ".." {
                                 if let Some(_last) = vectorised.pop(){
                                     *path = vectorised.join("/");
-                                    return 0;
                                 } else {
                                     println!("gebasz van helo");
                                     return -1;
                                 }
                             } else if directory == "."{
                                 //do nothing, this is the current one
-                            } else {
+                            } else { // change to a local directory
                                 //println!("{}", directory);
                                 *path = path.to_owned()+"/"+directory;
                             }
                         }
-                        -2
+                        0
                     } 
                 }
             )
