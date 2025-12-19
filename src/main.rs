@@ -110,12 +110,14 @@ fn main()  {
                                 }
                             } else if directory == "."{
                                 //do nothing, this is the current one
-                            } else { // change to a local directory
+                            } else if directory != "" { // change to a local directory
                                 //println!("{}", directory);
                                 *path = path.to_owned()+"/"+directory;
+                            } else {
+
                             }
                         }
-                        0
+                        return 0;
                     } 
                 }
             )
