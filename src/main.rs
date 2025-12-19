@@ -46,7 +46,7 @@ fn main()  {
                                             if bins.contains(&prog){
                                                 let metadata = fs::metadata(format!("{}/{}", &dir, prog)).unwrap();
                                                 let permissions = metadata.permissions();
-                                                if permissions.mode() & 0o111 != 0{continue;}
+                                                if permissions.mode() & 0o111 == 0{continue;}
                                                 println!("{} is {}/{}", &prog, dir, &prog);
                                                 return 0;
                                             }
