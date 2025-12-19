@@ -80,7 +80,7 @@ fn main()  {
             match findbin(&command.to_string(), &path) {
                 Ok(val)=>{
                     let full = val.to_string()+"/"+command;
-                    let output = Command::new(&full)
+                    let output = Command::new(command)
                         .args(input.split(" ").collect::<Vec<&str>>().split_off(1)).output().expect(&format!("path: {}\ncmd: {}\nfull: {}", val, command, &full).to_string());
                     if output.status.success(){
                         let stdout = String::from_utf8_lossy(&output.stdout);
