@@ -14,7 +14,7 @@ fn main()  {
       "echo".to_string(),
       Box::new(
         move |mut _input: String, _commands: &Vec<String>, _path: &mut String, params: &Vec<String>|{
-          println!("{}", params.join(""));
+          println!("{}", params.join(" "));
           return 0;
         }
       ) as Box<dyn Fn(String, &Vec<String>, &mut String, &Vec<String>)->i32>
@@ -143,7 +143,7 @@ fn main()  {
     let mut params: Vec<String> = vec![];
 
     let mut counter = 0;
-    params = input.split("\'").map(|x|
+    params = input.replace("\'\'", "").split("\'").map(|x|
       {
         counter+=1;
         if counter%2==1{
