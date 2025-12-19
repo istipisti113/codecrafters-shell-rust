@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::{env, fs};
 use std::path::Path;
 use std::os::unix::fs::PermissionsExt;
+use std::process::Command;
 
 fn main()  {
     //let mut builtins: HashMap<String, Box<dyn Fn(String)-> i32>> = HashMap::from([
@@ -38,24 +39,16 @@ fn main()  {
                     } else {
                         match env::var("PATH") {
                             Ok(val) => {
-                                for dir in val.split(":"){
-                                    match Path::new(dir).read_dir() {
-                                        Ok(val)=>{
-                                            let bins = val.map(|x| x.unwrap().file_name()).map(|x| x.into_string().unwrap()).collect::<Vec<String>>();
-                                            //println!("{}", bins.join(", "));
-                                            if bins.contains(&prog){
-                                                let metadata = fs::metadata(format!("{}/{}", &dir, prog)).unwrap();
-                                                let permissions = metadata.permissions();
-                                                if permissions.mode() & 0o111 == 0{continue;}
-                                                println!("{} is {}/{}", &prog, dir, &prog);
-                                                return 0;
-                                            }
-                                        },
-                                        Err(_e)=>{} //nix shenanigans, some directories dont actually exist
+                                match findbin(&prog, &val) {
+                                    Ok(dir) => {
+                                        println!("{} is {}/{}", prog, dir, prog);
+                                        0
+                                    },
+                                    Err(e)=>{
+                                        println!("{}", e);
+                                        -1
                                     }
                                 }
-                                println!("{}: not found", prog);
-                                return -1;
                             },
                             Err(_e) => {
                                 println!("path is not found or readable or idk");
@@ -76,22 +69,50 @@ fn main()  {
         stdin.read_line(&mut input).unwrap();
         input = input.trim().to_string();
         let command = input.split(" ").nth(0).unwrap();
+        let path = env::var("PATH").unwrap();
         if builtins.contains_key(command){
             if builtins[command](input, &commands) == 1 {
                 return;
             }
+
         }
-        /*
-        else if command == "type" {
-            let a = input.split(" ").nth(1).unwrap();
-            if builtins.contains_key(a) || a == "type" {
-                println!("{} is a shell builtin", a);
-            } else {
-                println!("{}: not found", a);
-            }
-        }*/
         else{
-            println!("{}: command not found", input.trim());
+            match findbin(&command.to_string(), &path) {
+                Ok(val)=>{
+                    let full = val.to_string()+"/"+command;
+                    let output = Command::new(&full)
+                        .args(input.split(" ").collect::<Vec<&str>>().split_off(1)).output().expect(&format!("path: {}\ncmd: {}\nfull: {}", val, command, &full).to_string());
+                    if output.status.success(){
+                        let stdout = String::from_utf8_lossy(&output.stdout);
+                        println!("{}", stdout);
+                    } else {
+                        let stderr = String::from_utf8_lossy(&output.stderr);
+                        println!("{}", stderr);
+                    }
+                },
+                Err(e)=> {
+                    println!("{}", e); //command not found
+                },
+            }
         }
     }
+}
+
+fn findbin(bin:&String, path: &String)-> Result<String, String>{
+    for dir in path.split(":"){
+        match Path::new(dir).read_dir() {
+            Ok(val)=>{
+                let bins = val.map(|x| x.unwrap().file_name()).map(|x| x.into_string().unwrap()).collect::<Vec<String>>();
+                //println!("{}", bins.join(", "));
+                if bins.contains(bin){
+                    let metadata = fs::metadata(format!("{}/{}", &dir, bin)).unwrap();
+                    let permissions = metadata.permissions();
+                    if permissions.mode() & 0o111 == 0{continue;}
+                    return Ok(dir.to_string());
+                }
+            },
+            Err(_e)=>{} //nix shenanigans, some directories dont actually exist
+        }
+    }
+    return Err(format!("{}: not found", bin));
 }
