@@ -84,7 +84,9 @@ fn main()  {
                         .args(input.split(" ").collect::<Vec<&str>>().split_off(1)).output().expect(&format!("path: {}\ncmd: {}\nfull: {}", val, command, &full).to_string());
                     if output.status.success(){
                         let stdout = String::from_utf8_lossy(&output.stdout);
-                        println!("{}", stdout);
+                        if stdout.len()>0{
+                            println!("{}", stdout);
+                        }
                     } else {
                         let stderr = String::from_utf8_lossy(&output.stderr);
                         println!("{}", stderr);
