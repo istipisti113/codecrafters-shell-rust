@@ -94,6 +94,7 @@ fn main()  {
                         }
                     } else if dir.chars().into_iter().nth(0).unwrap() == '/'{ // absolute path
                         *path = dir.to_owned();
+                        return 0;
                     }
                     *path = path.to_owned()+"/"+dir;
                     0
