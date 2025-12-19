@@ -120,8 +120,7 @@ fn main()  {
                 }
               } else if directory != "" { // change to a local directory
                 *path = path.to_owned()+"/"+directory;
-              } else {
-                todo!("nem ures nem . ..")
+              } else {//do nothing
               }
             }
             return 0;
